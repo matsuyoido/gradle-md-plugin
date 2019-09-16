@@ -1,0 +1,75 @@
+buildscript {
+    ext {
+        gradleVersion = '5.5.2'
+        jdkVersion = JavaVersion.VERSION_1_8
+        // jdkVersion = JavaVersion.VERSION_11
+        junitVersion = '5.4.2'
+        assertJVersion = '3.11.1'
+        defaultEncoding = 'UTF-8'
+    }
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.gradle.publish:plugin-publish-plugin:0.10.1"
+    }
+}
+
+wrapper {
+    gradleVersion = "${gradleVersion}"
+}
+
+apply {
+    plugin 'java'
+    plugin 'java-library'
+    plugin 'eclipse'
+}
+
+[compileJava, compileTestJava]*.options*.encoding = "${defaultEncoding}"
+sourceCompatibility = "${jdkVersion}"
+targetCompatibility = "${jdkVersion}"
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+    test.compileClasspath += configurations.compileOnly
+    test.runtimeClasspath += configurations.compileOnly
+}
+test {
+    useJUnitPlatform()
+}
+javadoc {
+    options.charSet = "${defaultEncoding}"
+    options.encoding = "${defaultEncoding}"
+}
+
+task initSrcDirs {
+    doLast {
+        sourceSets.all {
+            java.srcDirs*.mkdirs()
+        }
+    }
+}
+tasks.eclipse.dependsOn(initSrcDirs)
+
+
+repositories {
+    mavenCentral()
+}
+dependencies {
+    implementation gradleApi()
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation "org.assertj:assertj-core:${assertJVersion}"
+
+
+}
