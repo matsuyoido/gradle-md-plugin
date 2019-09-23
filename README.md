@@ -1,66 +1,94 @@
 # gradle-md-plugin
 
+## Feature
 
-## Markdown
+This gradle plugin convert `markdown file` into `html/pdf` file.
 
-https://github.com/vsch/flexmark-java
+Markdown file is converted by [flexmark-java](https://github.com/vsch/flexmark-java).
 
-### 装飾
+I want to provide it to work alone.
 
-https://github.com/sindresorhus/github-markdown-css
+## Tasks
 
-
-### 実装
-
-* Gradle のプラグインとして提供する
-* 対象のディレクトリを指定し、mdファイルを、htmlファイルに変換する
-  - ディレクトリ構造はそのままで。
-  - _{ファイル名}.md で対象外にする(include 用のファイル)
-* htmlファイルをpdfに変換する
-
-### タスク
-1. mdファイルをhtmlファイルに変換する
-2. mdファイルをpdfファイルに変換する
-3. 1を実行後、bootRunする
-  - https://stackoverflow.com/questions/39839223/how-to-create-a-gradle-task-that-will-execute-bootrun-with-a-specific-profile
-  - すべてのRequestを受け取り、URIからHTMLにアクセスをする
-      - @RequestMapping("/**")
-      - springAutoConfigurationの、 prefix を絶対パスで指定してみるとか？
-      - https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/thymeleaf/ThymeleafProperties.java#L147-L149
+1. `$ gradlew md2html`
+1. `$ gradlew md2pdf`
 
 
-### Extension
+## Extension
 
-* include できるようにする
-  - https://github.com/vsch/flexmark-java/wiki/Usage#include-markdown-and-html-file-content
-* 便利なNoteとかの表示をする
-  - https://github.com/vsch/flexmark-java/wiki/Extensions#admonition
-  - https://github.com/vsch/flexmark-java/wiki/Admonition-Extension
-* Link にid を割り振る
-  - https://github.com/vsch/flexmark-java/wiki/Extensions#anchorlink
-* class や id を設定する
-  - https://github.com/vsch/flexmark-java/wiki/Extensions#attributes
-  - https://github.com/vsch/flexmark-java/wiki/Attributes-Extension
-* 下部に注釈をつけられる
-  - https://github.com/vsch/flexmark-java/wiki/Extensions#footnotes
-* タスクリストを作成する
-  - https://github.com/vsch/flexmark-java/wiki/Extensions#gfm-tasklist
-* GitLab の記法ができる(mermaid とか使える)
-  - https://github.com/vsch/flexmark-java/wiki/Extensions#gitlab-flavoured-markdown
-* GitLab のテーブルを表示する
-  - https://github.com/vsch/flexmark-java/wiki/Extensions#tables
-  - https://github.com/vsch/flexmark-java/wiki/Tables-Extension
-* Link を設定する
-  - https://gitq.com/vsch/flexmark-java/topics/8/prepend-image-links-with-custom-url/1
+### Full extension
+
+```
+markdown {
+  inputDir = file("$rootDir/markdown")
+  outputDir = file("$rootDir/document")
+
+  html {
+    css = [
+      // you can specify local file or server file.
+      "$rootDir/your/want/to/adapt/cssfile.css",
+      "https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.min.css"
+    ]
+    js = [
+      // you can specify local file or server file.
+      "$rootDir/your/want/to/adapt/jsfile.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+    ]
+    // you can setup layout html.
+    // But please set `<md></md>` tag. <md> tag replace markdown text.
+    body = """\
+<header>
+  <h1>Document</h1>
+</header>
+<section>
+  <md>
+    <p>This place replace converted html text.</p>
+    <p>If this extension's body text copy real html file, you can check visual.</p>
+  </md>
+</section>
+<footer>
+  <p><small>&copy; 2019- matsuyoido</small></p>
+</footer>
+    """
+  }
+}
+```
+
+### Minimum Extension
+
+```
+markdown {
+  inputDir = file("$rootDir/markdown")
+  outputDir = file("$rootDir/document")
+}
+```
 
 
+## Bug or Request
 
-* docxに変換する
-  - https://github.com/vsch/flexmark-java/wiki/Extensions#docx-converter
-  - https://github.com/vsch/flexmark-java/wiki/Customizing-Docx-Rendering
-* pdfに変換する
-  - https://github.com/vsch/flexmark-java/wiki/PDF-Renderer-Converter
-  - https://github.com/vsch/flexmark-java/wiki/Usage#render-html-to-pdf
-* htmlに変換する
-  - https://github.com/vsch/flexmark-java/wiki/Usage#parse-and-render-to-html
+please create New Issue in Japanese or English. (Japanese is better...)
 
+
+## Q&A
+
+### What's file target of conversion ?
+
+Target is `.md` file specified at `inputDir`.
+
+But, file name starts with `_` is excluded.
+
+
+### What's extension enabled ?
+
+Please see [this code](https://github.com/matsuyoido/gradle-md-plugin/blob/master/src/main/java/com/matsuyoido/plugin/markdown/task/MarkdownParserOptionBuilder.java#L72-L96).
+
+
+### What does the title of generated HTML become ?
+
+File name is title.
+
+### Can I include image file in markdown ?
+
+Yes. ex. `![imageAltText](imagePath.jpeg)`
+
+If imagePath is local file, convert type of Base64.
