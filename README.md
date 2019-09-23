@@ -92,3 +92,14 @@ File name is title.
 Yes. ex. `![imageAltText](imagePath.jpeg)`
 
 If imagePath is local file, convert type of Base64.
+
+
+## LICENSE
+
+[This LICENSE](https://github.com/matsuyoido/gradle-md-plugin/blob/master/LICENSE).
+
+below is [required](https://github.com/vsch/flexmark-java/blob/master/LICENSE.txt).
+
+Copyright (c) 2015-2016 Atlassian and others.
+
+Copyright (c) 2016-2018, Vladimir Schneider,
