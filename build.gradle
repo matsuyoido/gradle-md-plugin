@@ -15,7 +15,6 @@ buildscript {
         }
     }
     dependencies {
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.8.RELEASE"
         classpath "com.gradle.publish:plugin-publish-plugin:0.10.1"
     }
 }
@@ -62,13 +61,6 @@ task initSrcDirs {
 }
 tasks.eclipse.dependsOn(initSrcDirs)
 
-apply plugin: "io.spring.dependency-management"
-dependencyManagement {
-    imports {
-        mavenBom "com.vladsch.flexmark:flexmark-java:${flexMarkJavaVersion}"
-    }
-}
-
 repositories {
     mavenCentral()
 }
@@ -79,34 +71,56 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation "org.assertj:assertj-core:${assertJVersion}"
 
-    implementation('com.vladsch.flexmark:flexmark')
-    implementation('com.vladsch.flexmark:flexmark-ext-media-tags')
-    implementation('com.vladsch.flexmark:flexmark-ext-tables')
-    implementation('com.vladsch.flexmark:flexmark-ext-definition')
-    implementation('com.vladsch.flexmark:flexmark-ext-typographic')
-    implementation('com.vladsch.flexmark:flexmark-ext-toc')
+    implementation("com.vladsch.flexmark:flexmark:${flexMarkJavaVersion}")
+    implementation("com.vladsch.flexmark:flexmark-ext-media-tags:${flexMarkJavaVersion}")
+    implementation("com.vladsch.flexmark:flexmark-ext-tables:${flexMarkJavaVersion}")
+    implementation("com.vladsch.flexmark:flexmark-ext-definition:${flexMarkJavaVersion}")
+    implementation("com.vladsch.flexmark:flexmark-ext-typographic:${flexMarkJavaVersion}")
+    implementation("com.vladsch.flexmark:flexmark-ext-toc:${flexMarkJavaVersion}")
+    implementation("com.vladsch.flexmark:flexmark-ext-aside:${flexMarkJavaVersion}")
     // https://github.com/vsch/flexmark-java/wiki/Usage#include-markdown-and-html-file-content
-    implementation('com.vladsch.flexmark:flexmark-ext-jekyll-tag')
+    implementation("com.vladsch.flexmark:flexmark-ext-jekyll-tag:${flexMarkJavaVersion}")
     // https://github.com/vsch/flexmark-java/wiki/Admonition-Extension
-    implementation('com.vladsch.flexmark:flexmark-ext-admonition')
+    implementation("com.vladsch.flexmark:flexmark-ext-admonition:${flexMarkJavaVersion}")
     // https://github.com/vsch/flexmark-java/wiki/Extensions#anchorlink
-    implementation('com.vladsch.flexmark:flexmark-ext-anchorlink')
+    implementation("com.vladsch.flexmark:flexmark-ext-anchorlink:${flexMarkJavaVersion}")
     // https://github.com/vsch/flexmark-java/wiki/Attributes-Extension
-    implementation('com.vladsch.flexmark:flexmark-ext-attributes')
+    implementation("com.vladsch.flexmark:flexmark-ext-attributes:${flexMarkJavaVersion}")
     // https://github.com/vsch/flexmark-java/wiki/Extensions#footnotes
-    implementation('com.vladsch.flexmark:flexmark-ext-footnotes')
+    implementation("com.vladsch.flexmark:flexmark-ext-footnotes:${flexMarkJavaVersion}")
     // https://github.com/vsch/flexmark-java/wiki/Extensions#gfm-tasklist
-    implementation('com.vladsch.flexmark:flexmark-ext-gfm-tasklist')
+    implementation("com.vladsch.flexmark:flexmark-ext-gfm-tasklist:${flexMarkJavaVersion}")
     // https://github.com/vsch/flexmark-java/wiki/Extensions#gitlab-flavoured-markdown
-    implementation('com.vladsch.flexmark:flexmark-ext-gitlab')
+    implementation("com.vladsch.flexmark:flexmark-ext-gitlab:${flexMarkJavaVersion}")
     // https://github.com/vsch/flexmark-java/wiki/Extensions#macros
-    implementation('com.vladsch.flexmark:flexmark-ext-macros')
+    implementation("com.vladsch.flexmark:flexmark-ext-macros:${flexMarkJavaVersion}")
 
     // https://github.com/vsch/flexmark-java/wiki/Extensions#docx-converter
     // https://github.com/vsch/flexmark-java/wiki/Customizing-Docx-Rendering
-    implementation('com.vladsch.flexmark:flexmark-docx-converter')
+    // implementation("com.vladsch.flexmark:flexmark-docx-converter:${flexMarkJavaVersion}")
     // https://github.com/vsch/flexmark-java/wiki/PDF-Renderer-Converter
-    implementation('com.vladsch.flexmark:flexmark-pdf-converter')
+    implementation("com.vladsch.flexmark:flexmark-pdf-converter:${flexMarkJavaVersion}")
 }
 
+version = '0.0.1'
+group = 'com.matsuyoido'
+jar.baseName = 'matsuyoido-markdown-gradle-plugin'
+
+apply plugin: 'java-gradle-plugin'
+gradlePlugin {
+    plugins {
+        mdPlugin {
+            id = 'com.matsuyoido.markdown'
+            implementationClass = 'com.matsuyoido.plugin.markdown.MainPlugin'
+            displayName = 'This plugin support preparation of document.'
+            description = 'md -> html | md -> pdf'
+        }
+    }
+}
+
+apply plugin: 'com.gradle.plugin-publish'
+pluginBundle {
+    website = 'https://github.com/matsuyoido/gradle-md-plugin' // temporary url
+    vcsUrl = 'https://github.com/matsuyoido/gradle-md-plugin'
+    tags = ['document', 'md', 'markdown', 'pdf', 'html']
 }

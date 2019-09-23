@@ -10,6 +10,11 @@
             "label": "refresh classpath",
             "type": "shell",
             "command": "./gradlew.bat cleanEclipse eclipse pluginUnderTestMetadata"
+        },
+        {
+            "label": "plugin publish",
+            "type": "shell",
+            "command": "./gradlew.bat clean publishPlugins --stacktrace"
         }
     ]
 }

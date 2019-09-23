@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.matsuyoido.flexmark.HtmlLinkExtension;
-import com.vladsch.flexmark.docx.converter.DocxRenderer;
+// import com.vladsch.flexmark.docx.converter.DocxRenderer;
 import com.vladsch.flexmark.ext.admonition.AdmonitionExtension;
 import com.vladsch.flexmark.ext.anchorlink.AnchorLinkExtension;
 import com.vladsch.flexmark.ext.aside.AsideExtension;
@@ -62,7 +62,7 @@ public class MarkdownParserOptionBuilder {
         }
         option.set(Parser.EXTENSIONS, extensions);
         option.set(HtmlRenderer.INDENT_SIZE, 2);
-        option.set(DocxRenderer.SUPPRESS_HTML, true);
+        // option.set(DocxRenderer.SUPPRESS_HTML, true);
         return option;
     }
 
