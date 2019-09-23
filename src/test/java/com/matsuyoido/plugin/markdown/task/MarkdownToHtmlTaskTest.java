@@ -6,8 +6,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
@@ -458,6 +462,19 @@ public class MarkdownToHtmlTaskTest {
         assertContains(outputDir.resolve("simple.html").toFile(), "<a href=\"./test.html\">test</a>");
     }
 
+    @Test
+    public void imageMarkdown() throws IOException {
+        Files.copy(getResourcePath("test.jpg"), inputDir.resolve("test.jpg"));
+        Files.write(inputDir.resolve("image_inSameDir.md"), "![test](test.jpg)".getBytes());
+        Files.write(inputDir.resolve("image_relative.md"), "![test](./../test.jpg)".getBytes());
+        Files.write(inputDir.resolve("image_url.md"), "![test](https://avatars0.githubusercontent.com/u/47081054?s=400)".getBytes());
+
+        task.taskAction(new MockIncrementalTaskInputs());
+
+        assertContains(outputDir.resolve("image_inSameDir.html").toFile(), "img", "src=\"data:image/jpeg;base64,");
+        assertContains(outputDir.resolve("image_relative.html").toFile(), "img", "src=\"" + inputDir.getParent().resolve("test.jpg").toFile().getCanonicalPath());
+        assertContains(outputDir.resolve("image_url.html").toFile(), "img", "src=\"https://avatars0.githubusercontent.com/u/47081054?s=400");
+    }
 
     private void assertContains(File file, String... expected) {
         try {
@@ -478,6 +495,16 @@ public class MarkdownToHtmlTaskTest {
                 assertThat(sb.indexOf(expect)).isGreaterThan(-1);
             }
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Path getResourcePath(String path) {
+        String uri = ClassLoader.getSystemResource(path).getPath();
+        uri = uri.startsWith("/") ? uri.substring(1) : uri;
+        try {
+            return Paths.get(URLDecoder.decode(uri, StandardCharsets.UTF_8.name()));
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }

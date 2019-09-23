@@ -9,6 +9,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
 import java.util.AbstractMap.SimpleEntry;
@@ -17,11 +18,13 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.vladsch.flexmark.ast.Image;
 import com.vladsch.flexmark.ext.jekyll.tag.JekyllTagExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+import com.vladsch.flexmark.util.sequence.CharSubSequence;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
@@ -124,6 +127,18 @@ public class MarkdownToHtmlTask extends DefaultTask {
                 document.set(JekyllTagExtension.INCLUDED_HTML, includeHtmlMap);
             }
         }
+        document.getChildIterator().forEachRemaining(node -> {
+            node.getChildIterator().forEachRemaining(childNode -> {
+                if (childNode instanceof Image) {
+                    Image image = (Image) childNode;
+                    String url = image.getUrl().toString();
+                    if (!(url.startsWith("http://") || url.startsWith("https://"))) {
+                        Path imagePath = markdownPath.getParent().resolve(url);
+                        image.setUrl(CharSubSequence.of(convertBase64Url(imagePath)));
+                    }
+                }
+            });
+        });
         String result = renderer.render(document);
         return result;
     }
@@ -134,6 +149,25 @@ public class MarkdownToHtmlTask extends DefaultTask {
         try (FileOutputStream fos = new FileOutputStream(outputFile);
                 OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
             writer.write(content);
+        }
+    }
+
+    private String convertBase64Url(Path imagePath) {
+        try {
+            String contentType = Files.probeContentType(imagePath);
+            String base64str = Base64.getEncoder().encodeToString(Files.readAllBytes(imagePath));
+            StringBuilder base64Url = new StringBuilder();
+            base64Url.append("data:");
+            base64Url.append(contentType);
+            base64Url.append(";base64,");
+            base64Url.append(base64str);
+            return base64Url.toString();
+        } catch (IOException e) {
+            try {
+                return imagePath.toFile().getCanonicalPath();
+            } catch (IOException e1) {
+                return imagePath.toString();
+            }
         }
     }
 }
